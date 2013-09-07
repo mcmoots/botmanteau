@@ -14,6 +14,7 @@ import csv
 import re
 import numpy
 import nltk
+from itertools import chain
 
 # load cmudict
 from nltk.corpus import cmudict
@@ -29,19 +30,19 @@ def sim_score(str1, str2, smatrix):
     return float(smatrix[str1][str2])
 
 
-def phonemize_string(istr, pdict):
-    """Return phonemic representation of a multiword string
+def str_to_wordphones(istr, pdict):
+    """Return phonemic representation of a multiword string as list of lists
 
-    Strategy 1: Look up all words in string in pdict (phonetic dictionary)
-    If that fails: Puke a warning.
-    Todo: Add a better fallback method.
+    Strategy 1: Look up all words in string in pdict (phonetic dict)
+    If that fails: puke a warning.
+    Todo: Add a better fallback method
     """
     words = nltk.wordpunct_tokenize(istr)
     words = [x for x in words if re.match('[a-zA-Z]+', x)]
     phs = []
     try:
-        for x in words:
-            phs.extend(pdict[x.lower()][0])
+        for w in words:
+            phs.append(pdict[w.lower()][0])
     except KeyError:
         print "%s not in dictionary" % x
         return []
@@ -115,18 +116,75 @@ def sw_match(phl1, phl2, smat):
     (aphl1, aphl2, startAlign1, startAlign2) = sw_traceback(pointers, phl1, phl2, maxScore[1], maxScore[2])
     return (aphl1, aphl2, startAlign1, startAlign2)
 
-def sw_phones_align(str1, str2, smat):
+def find_listbounds(nlist):
+    """Return list of positions representing a sublist boundary in flattened list
+    """
+    lens = [len(s) for s in nlist]
+    bounds = [0]
+    count = 0
+    for i in range(len(lens)-1):
+        count += lens[i]
+        bounds.append(count)
+    return bounds
+    
+
+def orthographize_pun(str1, str2, pdict, sa1, sa2):
+    """Generate a portmanteau from original strings + phoneme alignment position
+
+    Strategy one: Try to align using word boundaries.
+    Strategy two: Try to align using naive syllable boundaries.
+    """
+    words1 = nltk.wordpunct_tokenize(str1)
+    words2 = nltk.wordpunct_tokenize(str2)
+    phw1 = str_to_wordphones(str1, pdict)
+    phw2 = str_to_wordphones(str2, pdict)
+    pm = ""
+    # Check if start alignment is on word boundary
+    b1 = find_listbounds(phw1)
+    b2 = find_listbounds(phw2)
+    if sa1 in b1 and sa2 in b2 and (sa1 != 0 or sa2 != 0):
+        # word boundaries will work!
+        if sa1 > sa2: # start with str1, switch to str2
+            for i in range(b1.index(sa1)):
+                pm += words1[i]
+            pm += ' ' + str2
+        elif sa2 > sa1: # start with str1, switch to str2
+            for i in range(b2.index(sa2)):
+                pm += words2[i]
+            pm += ' ' + str1
+        elif sa1 == sa2:
+            print "um wtf i dunno"
+    else:
+        print "Syllable alignment not written yet, sorry."
+
+    return pm
+    
+
+
+def sw_phones_align(str1, str2, smat, pdict):
     """Smith-Waterman alignment of phoneme lists
 
     """
-    phl1 = phonemize_string(str1, d)
-    phl2 = phonemize_string(str2, d)
+    phl1 = list(chain.from_iterable(str_to_wordphones(str1,pdict)))
+    phl2 = list(chain.from_iterable(str_to_wordphones(str2,pdict)))
     if phl1==[] or phl2==[]:
         return False
     (aphl1, aphl2, startAlign1, startAlign2) = sw_match(phl1, phl2, smat)
+    # split strings into grapheme syllables using vowels
+    syl = re.compile('[aeiouy]+[bcdfghjklmnpqrstvwxz]*')
+    gm1 = re.findall(syl, str1)
+    gm2 = re.findall(syl, str2)
+    # check if it worked by comparing to number of vowels in phoneme list
+    # arpabet vowels = anything with a digit + 'UW'
+    vowph = re.compile('\d')
+    v1 = [x for x in phl1 if re.search(vowph, x) or x=='UW']
+    v2 = [x for x in phl2 if re.search(vowph, x) or x=='UW']
+    if len(gm1) != len(v1):
+        print "Warning: English orthography in %s" % str1
+    if len(gm2) != len(v2):
+        print "Warning: English orthography in %s" % str2
+    # Break     
     return (aphl1, aphl2, startAlign1, startAlign2)
-
-
 
 
 # load similarity matrix
