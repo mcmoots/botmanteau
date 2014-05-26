@@ -1,13 +1,13 @@
 eggs
 toast
 bagel
-muffins
+muffin
 french toast
 cereal
 pancakes
 waffles
 leftovers
-sausage 
+sausage
 fruit
 granola
 oatmeal
@@ -15,7 +15,7 @@ muesli
 yogurt
 pizza
 smoothie
-sandwich 
+sandwich
 ham
 donuts
 pop tarts 
@@ -29,6 +29,7 @@ maple syrup
 biscuits and gravy
 grits
 grapefruit
+orange
 orange juice
 juice
 scrambled eggs
@@ -45,12 +46,15 @@ English muffin
 French toast
 scone
 hash browns
-omelette
+omelet
 hash
 bubble and squeak
 johnnycake
-congee
 poached egg
 tea
 bacon and eggs
 sausage and eggs
+sunny side up
+jam
+jelly
+hash
