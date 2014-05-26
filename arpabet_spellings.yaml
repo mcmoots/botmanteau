@@ -9,13 +9,13 @@ JH: [dg, g, G, Dg, J, j, Dj, dj]
 K: [C, c, K, k, ck, x, ch]
 L: [L, l]
 M: [M, m]
-N: [N, n, pn, Pn]
+N: [N, n, pn, Pn, kn, gn, Kn, Gn]
 NG: [ng, Ng]
 P: [P, p]
 R: [R, r, Rh, rh]
 S: [S, s, X, x, z, C, c]
 SH: [Sh, sh, ssi, Sch, sch, si, Ch, ch, ti]
-T: [T, t, d]
+T: [T, t, d, bt, pt, Pt]
 TH: [th, Th]
 V: [V, v]
 W: [Wh, wh, W, w, Qu, qu, r, gu, o, O]
@@ -68,3 +68,14 @@ UW: [A, E, I, O, U, Y, a, e, i, o, u, y]
 UW0: [A, E, I, O, U, Y, a, e, i, o, u, y]
 UW1: [A, E, I, O, U, Y, a, e, i, o, u, y]
 UW2: [A, E, I, O, U, Y, a, e, i, o, u, y]
+WB:
+  - ' '
+  - '\.'
+  - '"'
+  - '!'
+  - '\?'
+  - 'e '
+  - 'e\.'
+  - 'e!'
+  - 'e\?'
+  - 'e"'

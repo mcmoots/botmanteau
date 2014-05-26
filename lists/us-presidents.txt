@@ -4,17 +4,17 @@ Thomas Jefferson
 James Madison
 James Monroe
 John Quincy Adams
-Andrew Jackson (1829-1837)
-Martin Van Buren (1837-1841)
-William H. Harrison (1841)
-John Tyler (1841-1845)
-James K. Polk (1841-1849)
-Zachary Taylor (1849-1850)
-Millard Fillmore (1850-1853)
-Franklin Pierce (1853-1857)
-James Buchanan (1857-1861)
-Abraham Lincoln (1861-1865)
-Andrew Johnson (1865-1869)
+Andrew Jackson
+Martin Van Buren
+William H. Harrison
+John Tyler
+James K. Polk
+Zachary Taylor
+Millard Fillmore
+Franklin Pierce
+James Buchanan
+Abraham Lincoln
+Andrew Johnson
 Ulysses S. Grant (1869-1877)
 Rutherford B. Hayes (1877-1881)
 James A. Garfield (1881)
