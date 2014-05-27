@@ -120,8 +120,22 @@ class PhonemeDictset:
     def findPhonemeBreakpoints(self, str, phonemes):
         """Find the point in a string where 2 phonemes might be next to each other
         """
+
         possible_starts = []
         breakpoints = []
+
+        # Special case for initials & abbreviations
+        single_letter = re.compile('(\W|^)(?=(\w(\W|$)))')
+        if re.match(single_letter, str):
+            # todo single letter workaround
+            # get phoneme list for the single letter from CMU dict
+            # search it for:
+            #   phone1 + phone2 combo (if found, append to breakpoints)
+            #   phone1 (if found, append beginning of next word to possible_starts)
+            #   phone2 (if found... ????)
+            pass
+
+
         # Loop through 1st phoneme's possible spellings to find it in 1st string
         # todo - fix for word boundaries
         for spell in self.arpaspell[phonemes[0]]:
@@ -142,6 +156,9 @@ class PhonemeDictset:
                         breakpoints.append(s+1)
                     else:
                         breakpoints.append(s)
+
+        if breakpoints == []:
+            print "Failed to find breakpoint in " + str + ' ' + phonemes[0] + ' ' + phonemes[1]
 
         return breakpoints
 
@@ -180,32 +197,62 @@ class Portmanteauer:
         #todo fail if match did not leave a "tail" on either string
 
         # Locate splice points in the longer word
-        if sa1 == 0:
+
+        # cases: splice1 = 0 / splice2 = n  - beginning of word
+        #       splice1 = n / splice2 = n - middle of word
+        #       splice1 = n / splice2 = end of word
+        splice1 = 0
+        splice2 = 0
+        overlap_position = 'error'
+
+        if sp == 0 and sp + len(aph_long) >= len(plist_long):
+            return None
+
+        if sp == 0:
+            # overlap at beginning of longword
+            # in this case we don't want to be greedy about splice2
+            overlap_position='beginning'
             splice1 = 0
-        else:
+            splices = self.phonedicts.findPhonemeBreakpoints(string_long,
+                                                             [ plist_long[sp + len(aph_long) - 1],
+                                                               plist_long[sp + len(aph_long)] ])
+            if splices == []:
+                return None
+            else:
+                splice2 = min(splices)
+        elif sp + len(aph_long) >= len(plist_long):
+            # overlap at end of longword
+            # in this case we don't want to be greedy about splice1
+            overlap_position='end'
+            splice2 = len(string_long)
             splices = self.phonedicts.findPhonemeBreakpoints(string_long, [plist_long[sp-1], plist_long[sp]])
             if splices == []:
-                # ERROR! Throw & handle an exception?
-                print "Failed to find spelling in " + string_long + ' ' + plist_long[sp-1] + ' ' + plist_long[sp]
+                return None
+            else:
+                splice1 = max(splices)
+        else:
+            # overlap in the middle
+            # we will be greedy and cut out as much of longword as possible.
+            overlap_position='middle'
+            splices = self.phonedicts.findPhonemeBreakpoints(string_long, [plist_long[sp-1], plist_long[sp]])
+            if splices == []:
                 return None
             else:
                 splice1 = min(splices)
-
-        if sa1 + len(aph_long) >= len(plist_long):  # no "tail" on long word
-            splice2 = len(plist_long)
-        else:
-            splices = self.phonedicts.findPhonemeBreakpoints(string_long,
-                                                               [ plist_long[sa1+len(aph_long)-1],
-                                                                 plist_long[sa1+len(aph_long)] ] )
+            splices = self.phonedicts.findPhonemeBreakpoints(string_long, [ plist_long[sp + len(aph_long) - 1],
+                                                                            plist_long[sp + len(aph_long)] ])
             if splices == []:
-                print "Failed to find spelling in " + string_long + ' ' + plist_long[sa1 + len(aph_long) - 1] + \
-                    ' ' + plist_long[sa1 + len(aph_long)]
                 return None
-            splice2 = max(splices)
+            else:
+                splice2 = max(splices)
 
-            # todo - preserve capitalization pattern of long string
-
-            return string_long[:splice1] + string_short + string_long[splice2:]
+        # todo - preserve capitalization pattern of long string
+        text = string_long[:splice1] + string_short + string_long[splice2:]
+        pct_replaced = 1 - (len(string_long[:splice1])+len(string_long[splice2:]))/len(string_long)
+        return {
+            'pun': text,
+            'puntype': overlap_position,
+            'pct_overlap': pct_replaced }
 
 
     def makePortmanteau(self):
@@ -214,15 +261,18 @@ class Portmanteauer:
         phl1 = list(chain.from_iterable(self.phonedicts.str_to_phones(self.str1)))
         phl2 = list(chain.from_iterable(self.phonedicts.str_to_phones(self.str2)))
 
-        print phl1
-        print phl2
-
         if phl1 == [] or phl2 == []:
             return None
         aphl1, aphl2, sa1, sa2, score = self.phonedicts.sw_match(phl1, phl2)
 
-        print aphl1
-        print aphl2
+        output = self.orthographizePun(aphl1, aphl2, phl1, phl2, sa1, sa2)
+        if output is None:
+            return None
+        else:
+            output['len_ph_1'] = len(phl1)
+            output['len_ph_2'] = len(phl2)
+            output['len_str_1'] = len(self.str1)
+            output['len_str_2'] = len(self.str2)
+            output['swscore'] = score
 
-        text = self.orthographizePun(aphl1, aphl2, phl1, phl2, sa1, sa2)
-        return text, len(phl1), len(phl2), len(self.str1), len(self.str2), score
+        return output

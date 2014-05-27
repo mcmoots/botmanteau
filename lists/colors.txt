@@ -1,0 +1,66 @@
+aqua
+aquamarine
+azure
+beige
+black
+almond
+blue
+violet
+brown
+chartreuse
+chocolate
+coral
+cornflower
+crimson
+cyan
+goldenrod
+gray
+green
+khaki
+magenta
+olive
+orange
+red
+salmon
+sea green
+slate
+turquoise
+pink
+sky blue
+brick red
+white
+fuchsia
+gold
+silver
+copper
+auburn
+yellow
+hot pink
+ivory
+taupe
+ecru
+lavender
+lemon
+indigo
+pink
+lime
+maroon
+teal
+dusty rose
+blush
+mauve
+peach
+mustard
+periwinkle
+lilac
+red
+tan
+navy blue
+mint green
+emerald
+powder blue
+spring green
+amber
+mahogany
+burnt sienna
+sepia

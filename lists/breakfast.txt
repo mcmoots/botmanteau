@@ -18,7 +18,7 @@ smoothie
 sandwich
 ham
 donuts
-pop tarts 
+pop tarts
 cinnamon rolls
 biscuits
 milk
