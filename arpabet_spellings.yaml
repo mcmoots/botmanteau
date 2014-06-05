@@ -15,7 +15,7 @@ P: [P, p]
 R: [R, r, Rh, rh]
 S: [S, s, X, x, z, C, c]
 SH: [Sh, sh, ssi, Sch, sch, si, Ch, ch, ti]
-T: [T, t, d, bt, pt, Pt]
+T: [T, t, d, bt, pt, Pt, Th, th]
 TH: [th, Th]
 V: [V, v]
 W: [Wh, wh, W, w, Qu, qu, r, gu, o, O]
@@ -43,9 +43,9 @@ AY2: [A, E, I, O, U, Y, a, e, i, o, u, y]
 EH0: [A, E, I, O, U, Y, a, e, i, o, u, y]
 EH1: [A, E, I, O, U, Y, a, e, i, o, u, y]
 EH2: [A, E, I, O, U, Y, a, e, i, o, u, y]
-ER0: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er]
-ER1: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er]
-ER2: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er]
+ER0: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er, Ar, ar]
+ER1: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er, Ar, ar]
+ER2: [A, E, I, O, U, Y, a, e, i, o, u, y, Er, er, Ar, ar]
 EY0: [A, E, I, O, U, Y, a, e, i, o, u, y]
 EY1: [A, E, I, O, U, Y, a, e, i, o, u, y]
 EY2: [A, E, I, O, U, Y, a, e, i, o, u, y]
@@ -79,3 +79,4 @@ WB:
   - 'e!'
   - 'e\?'
   - 'e"'
+  - ','

@@ -1,98 +1,61 @@
-# Portmanteau punning algorithm.
+# "Breakfast presidents" game Twitterbot
 
-# needs to take 2 strings and:
-#   convert to phonetic representation (CMU pronouncing dict + ???)
-#   calculate "match" score between 2 phoneme strings at given loc.
-#   return top-scoring match with the overlap substituted
-#       - which term "wins" in this? the shorter one?
-#   identify the point in the strings corresponding to the phonemic overlap
-#       and construct appropriately overlapped string
-
-# Easy test case: Eggsbraham Lincoln? Porridge Washington?
-
+import pickle
 import punmaker
-import csv
-import random
+import pandas
+import statsmodels.api as sm
 
 
-with open('lists/test.txt') as f:
-    tests = [line.rstrip('\n') for line in f]
-with open('lists/examples.txt') as f:
-    examples = [line.rstrip('\n') for line in f]
+class GameRound:
+    """ Stuff pertaining to one pair of topics / one day's game round
+    """
+    def __init__(self, list1, list2):
 
+        self.pdict = punmaker.PhonemeDictset()
+        self.model = pickle.load(open('./model.pickle'))
+        # todo: take topic names as args and read in lists from file
+        # instead of taking the lists as args
+        # self.list1 = etc
+        self.list1 = list1
+        self.list2 = list2
 
-def get_ynq_input(prompt):
-    ans = raw_input(prompt)
-    while ans not in ['y', 'n', 'q']:
-        ans = raw_input('y/n (or q to quit) ')
-    return ans
+    def makeAllPuns(self):
+        """Generate all possible puns + a predicted score
 
+        Step 1: Generate puns and store their predictive attributes in a data frame
+        Step 2: Add a predicted score
 
-def write_training_data_to_file(data, file):
-    with open(file, 'w+') as f:
-        keys = ['pun', 'len_ph_1', 'len_ph_2', 'len_str_1', 'len_str_2',
-                'puntype', 'pct_overlap', 'swscore', 'result']
-        datawriter = csv.DictWriter(f, keys)
-        datawriter.writer.writerow(keys)
-        datawriter.writerows(data)
-    return 0
+        Returns a data frame with all of the scored puns.
+        """
+        puns = []
+        for i1 in self.list1:
+            for i2 in self.list2:
+                p = punmaker.Portmanteauer(i1, i2, self.pdict)
+                pun = p.makePortmanteau()
 
-def get_123_input(prompt):
-    ans = raw_input(prompt)
-    while ans not in ['1', '2', '3', 'q']:
-        ans = raw_input('1, 2, 3 or q to quit')
-    return ans
+                if pun is None:
+                    continue
 
-def gather_forced_comparisons(list1, list2, iterations, output_file):
-    params = punmaker.PhonemeDictset()
-    training_data = []
+                if pun['pct_overlap'] < 0:
+                    continue
 
-    iters = 0
+                if pun['puntype'] == 'beginning':
+                    pun['position_beginning'] = 1
+                    pun['position_end'] = 0
+                elif pun['puntype'] == 'end':
+                    pun['position_end'] = 1
+                    pun['position_beginning'] = 0
+                else:
+                    pun['position_end'] = 0
+                    pun['position_beginning'] = 1
 
-    while iters < iterations:
-        breakfast1 = random.choice(list1)
-        president1 = random.choice(list2)
-        p1 = punmaker.Portmanteauer(breakfast1, president1, params).makePortmanteau()
+                pun.pop('puntype')
 
-        breakfast2 = random.choice(list1)
-        president2 = random.choice(list2)
-        p2 = punmaker.Portmanteauer(breakfast2, president2, params).makePortmanteau()
+                puns.append(pun)
 
-        if p1 is None or p2 is None:
-            continue
+        # convert to data frame
+        df = pandas.DataFrame(puns)
+        model_cols = ['position_end', 'position_beginning', 'short_strlen', 'long_strlen', 'swscore', 'pct_overlap']
+        df['score'] = self.model.predict(df[model_cols])
 
-        pun1 = '1. ' + breakfast1 + ' + ' + president1 + ' = ' + p1['pun']
-        pun2 = '2. ' + breakfast2 + ' + ' + president2 + ' = ' + p2['pun']
-        pun_choice = get_123_input( pun1 + '\n' + pun2 + '\n 3. these are both terrible?')
-
-        if pun_choice == 'q':
-            print "Ok, enough."
-            write_training_data_to_file(training_data, output_file)
-            return training_data
-        elif pun_choice == '1':
-            p1['result'] = 'w'
-            p2['result'] = 'l'
-        elif pun_choice == '2':
-            p1['result'] = 'l'
-            p2['result'] = 'w'
-        elif pun_choice == '3':
-            p1['result'] = 'l'
-            p2['result'] = 'l'
-        else:
-            print "WTF!" + pun_choice
-            return 2
-
-        training_data.append(p1)
-        training_data.append(p2)
-
-        iters += 1
-
-    write_training_data_to_file(training_data, output_file)
-    print "all done!"
-    return training_data
-
-
-
-
-
-
+        return df

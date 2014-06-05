@@ -157,8 +157,8 @@ class PhonemeDictset:
                     else:
                         breakpoints.append(s)
 
-        if breakpoints == []:
-            print "Failed to find breakpoint in " + str + ' ' + phonemes[0] + ' ' + phonemes[1]
+        # if breakpoints == []:
+        #     print "Failed to find breakpoint in " + str + ' ' + phonemes[0] + ' ' + phonemes[1]
 
         return breakpoints
 
@@ -247,8 +247,9 @@ class Portmanteauer:
                 splice2 = max(splices)
 
         # todo - preserve capitalization pattern of long string
-        text = string_long[:splice1] + string_short + string_long[splice2:]
-        pct_replaced = 1 - (len(string_long[:splice1])+len(string_long[splice2:]))/len(string_long)
+        text = string_long[:splice1] + string_short.capitalize() + string_long[splice2:]
+        pct_replaced = 1 - ( len(string_long[:splice1]) + len(string_long[splice2:]) ) / float(len(string_long))
+
         return {
             'pun': text,
             'puntype': overlap_position,
@@ -266,13 +267,15 @@ class Portmanteauer:
         aphl1, aphl2, sa1, sa2, score = self.phonedicts.sw_match(phl1, phl2)
 
         output = self.orthographizePun(aphl1, aphl2, phl1, phl2, sa1, sa2)
+
         if output is None:
             return None
         else:
-            output['len_ph_1'] = len(phl1)
-            output['len_ph_2'] = len(phl2)
-            output['len_str_1'] = len(self.str1)
-            output['len_str_2'] = len(self.str2)
+            output['short_strlen'] = min([len(self.str1), len(self.str2)])
+            output['long_strlen'] = max([len(self.str1), len(self.str2)])
             output['swscore'] = score
+
+        output['str1'] = self.str1
+        output['str2'] = self.str2
 
         return output
