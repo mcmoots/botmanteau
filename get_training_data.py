@@ -17,7 +17,7 @@ def get_ynq_input(prompt):
 
 def write_training_data_to_file(data, file):
     with open(file, 'w+') as f:
-        keys = ['pun', 'short_strlen', 'long_strlen',
+        keys = ['pun', 'str1', 'str2', 'short_strlen', 'long_strlen',
                 'puntype', 'pct_overlap', 'swscore', 'result']
         datawriter = csv.DictWriter(f, keys)
         datawriter.writer.writerow(keys)

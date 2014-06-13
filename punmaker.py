@@ -237,10 +237,12 @@ class Portmanteauer:
             splices = self.phonedicts.findPhonemeBreakpoints(string_long, [plist_long[sp-1], plist_long[sp]])
             if splices == []:
                 return None
-            else:
-                splice1 = min(splices)
+
+            splice1 = min(splices)
             splices = self.phonedicts.findPhonemeBreakpoints(string_long, [ plist_long[sp + len(aph_long) - 1],
                                                                             plist_long[sp + len(aph_long)] ])
+            splices = [s for s in splices if s > splice1]
+
             if splices == []:
                 return None
             else:

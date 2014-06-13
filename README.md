@@ -12,7 +12,7 @@ Here is my approach though:
 * Use a list of possible spellings for each phoneme to guess where the input strings should be spliced together
 
 Some to-dos:
-* Incorporate word boundaries into the matching (penalize mismatches very heavily) and spellings
+* Add initials to the spelling routine
 * Reorganize functions
 * Figure out a scoring system & score threshold for the results
 * Have it loop through 2 lists to find the puns, start hashtag games on Twitter

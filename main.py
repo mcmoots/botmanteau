@@ -3,7 +3,7 @@
 import pickle
 import punmaker
 import pandas
-import statsmodels.api as sm
+from sklearn import preprocessing
 
 
 class GameRound:
@@ -13,6 +13,8 @@ class GameRound:
 
         self.pdict = punmaker.PhonemeDictset()
         self.model = pickle.load(open('./model.pickle'))
+        self.scaler = pickle.load(open('./scaler.pickle'))
+        self.pca = pickle.load(open('./pca.pickle'))
         # todo: take topic names as args and read in lists from file
         # instead of taking the lists as args
         # self.list1 = etc
@@ -49,13 +51,22 @@ class GameRound:
                     pun['position_end'] = 0
                     pun['position_beginning'] = 1
 
-                pun.pop('puntype')
-
-                puns.append(pun)
+                try:
+                    pun.pop('puntype')
+                    puns.append(pun)
+                except ValueError:
+                    print i1 + ' ' + i2
+                    break
 
         # convert to data frame
         df = pandas.DataFrame(puns)
         model_cols = ['position_end', 'position_beginning', 'short_strlen', 'long_strlen', 'swscore', 'pct_overlap']
-        df['score'] = self.model.predict(df[model_cols])
+        # convert to numpy array
+        df = df.convert_objects(convert_numeric=True)
+        data = df.as_matrix([model_cols])
+        data_scaled = self.scaler.transform(data)
+        data_reduced = self.pca.transform(data_scaled)
+
+        df['score'] = self.model.predict(data_reduced)
 
         return df

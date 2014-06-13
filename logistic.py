@@ -1,15 +1,27 @@
 # logistic regression to find scoring for pun candidates
 
 import pandas
-import statsmodels.api as sm
+import numpy as np
+import pylab as pl
 from ggplot import *
+from sklearn import linear_model, decomposition, datasets
+from sklearn.pipeline import pipeline
+from sklearn.grid_search import GridSearchCV
 import pickle
+import statsmodels.api as sm
 
 
 df = pandas.read_csv('train_breakfast_presidents.csv')
-df = df.append( pandas.read_csv('train_fish_novels.csv'), ignore_index=True )
-df = df.append( pandas.read_csv('train_author_cocktails.csv'), ignore_index=True)
-df = df.append( pandas.read_csv('train_tree_sandwiches.csv'), ignore_index=True)
+df = df.append( pandas.read_csv('train_fish_sportsballs.csv'), ignore_index=True )
+df = df.append( pandas.read_csv('train_beer_novels.csv'), ignore_index=True)
+
+tdf = pandas.read_csv('test_breakfast_presidents.csv')
+tdf = tdf.append( pandas.read_csv('test_scifi_sandwiches.csv'), ignore_index=True )
+tdf = tdf.append( pandas.read_csv('test_tree_countries.csv'), ignore_index=True )
+
+# discard pct_overlap < 0 or >70%
+df = df[df.pct_overlap >= 0]
+df = df[df.pct_overlap < .7]
 
 print ggplot(df, aes('pct_overlap', 'swscore', color='result')) + geom_jitter()
 
@@ -18,24 +30,41 @@ print ggplot(df, aes('pct_overlap', 'swscore', color='result')) + geom_jitter()
 dummy_puntype = pandas.get_dummies(df['puntype'], prefix='position')
 cols_to_keep = ['short_strlen', 'long_strlen', 'swscore', 'pct_overlap', 'result']
 
-data = df[cols_to_keep].join(dummy_puntype.ix[:, :'position_end'], how='inner')
+df = df[cols_to_keep].join(dummy_puntype.ix[:, :'position_end'], how='inner')
 
 # convert 'w/l' result categories to 1/0
-data.loc[data.result == 'l', 'result'] = 0.0
-data.loc[data.result == 'w', 'result'] = 1.0
-
-# discard pct_overlap < 0
-data = data[data.pct_overlap >= 0]
-
-# arbitrary intercept
-data['intercept'] = 1.0
+df.loc[df.result == 'l', 'result'] = 0
+df.loc[df.result == 'w', 'result'] = 1
 
 # "object" or bool types will break statsmodels
-data = data.convert_objects(convert_numeric=True)
+df = df.convert_objects(convert_numeric=True)
 
-train_cols = ['short_strlen', 'long_strlen', 'swscore', 'pct_overlap', 'position_beginning', 'position_end']
-logit = sm.Logit(data['result'], data[train_cols])
-model = logit.fit()
+# convert to numpy matrix
+data = df.as_matrix(['short_strlen', 'long_strlen', 'swscore', 'pct_overlap',
+                     'position_beginning', 'position_end'])
+target = df['result']
 
-pickle.dump(model, open('./model.pickle', 'w+'))
+# Standardize & PCA
+scaler = preprocessing.StandardScaler().fit(data)
+data_scaled = scaler.transform(data)
 
+pca = decomposition.PCA(n_components='mle')
+pca.fit(data_scaled)
+
+data_reduced = pca.transform(data_scaled)
+
+logistic = linear_model.LogisticRegression()
+logistic.fit(data_reduced, target)
+
+dr = pandas.DataFrame(data_reduced)
+t = target.reset_index(drop=True)
+
+
+
+logit = sm.Logit(dr, t)
+result = logit.fit()
+
+# save the scaler, PCA, and model
+pickle.dump(scaler, open('./scaler.pickle', 'w+'))
+pickle.dump(pca, open('./pca.pickle', 'w+'))
+pickle.dump(logistic, open('./model.pickle', 'w+'))
