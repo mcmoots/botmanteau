@@ -1,5 +1,6 @@
 # "Breakfast presidents" game Twitterbot
 
+import sys
 import os
 import pickle
 import punmaker
@@ -7,8 +8,6 @@ import pandas
 import yaml
 import random
 from time import sleep
-import sys
-from sklearn import preprocessing
 
 
 class GameRound:
