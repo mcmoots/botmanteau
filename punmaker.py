@@ -223,7 +223,7 @@ class Portmanteauer:
         elif sp + len(aph_long) >= len(plist_long):
             # overlap at end of longword
             # in this case we don't want to be greedy about splice1
-            overlap_position='end'
+            overlap_position = 'end'
             splice2 = len(string_long)
             splices = self.phonedicts.findPhonemeBreakpoints(string_long, [plist_long[sp-1], plist_long[sp]])
             if splices == []:
@@ -233,7 +233,7 @@ class Portmanteauer:
         else:
             # overlap in the middle
             # we will be greedy and cut out as much of longword as possible.
-            overlap_position='middle'
+            overlap_position = 'middle'
             splices = self.phonedicts.findPhonemeBreakpoints(string_long, [plist_long[sp-1], plist_long[sp]])
             if splices == []:
                 return None

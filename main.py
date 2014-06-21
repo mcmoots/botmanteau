@@ -121,15 +121,27 @@ def run_bot(rootdir):
         error_text = "Not enough lists found in " + rootdir + 'lists/'
         sys.exit(error_text)
 
-    g = GameRound(random.sample(filenames, 2), rootdir)
+
+    for tries in range(0,4):
+        topics = random.sample(filenames, 2)
+        g = GameRound(topics, rootdir)
+        open_text = g.openerTweet()
+        try:
+            api.PostUpdate(open_text)
+            break
+        except TwitterError as e:
+            print "TwitterError: {0} ({1}) for {2} {3}".format(e.message, e.code, topics[0], topics[1])
+            sleep(10)
+
+        if tries == 3:
+            sad_text = "Not feeling very creative today. :["
+            api.PostUpdate(sad_text)
+            sys.exit()
+
     g.makeAllPuns()
 
-    # create & announce hashtag
-    open_text = g.openerTweet()
-    api.PostUpdate(open_text)
-
     # tweets!
-    puns = g.getTopPuns(n, 71)
+    puns = g.getTopPuns(71)
 
     for p in puns.iterrows():
         text = p[1][0].title() + ' ' + g.makeHashtag()
