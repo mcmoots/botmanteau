@@ -10,18 +10,18 @@ class PhonemeDictset:
 
     Similarity matrix, phoneme spellings, dictionary
     """
-    def __init__(self):
+    def __init__(self, rootdir):
         # pronouncing dictionary
         from nltk.corpus import cmudict
         self.dict = cmudict.dict()
         # phoneme similarity matrix
         self.phonesim={}
-        with open('arpabet-arbitrary-similarity-matrix.csv') as arp:
+        with open(rootdir + 'arpabet-arbitrary-similarity-matrix.csv') as arp:
             areader = csv.DictReader(arp, delimiter=',', quotechar='"')
             for row in areader:
                 self.phonesim[row['Phone']] = row
         # arpabet spellings
-        self.arpaspell = yaml.load(open('arpabet_spellings.yaml'))
+        self.arpaspell = yaml.load(open(rootdir + 'arpabet_spellings.yaml'))
 
     def str_to_phones(self, string):
         """Convert string to list of phonemes

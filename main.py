@@ -1,15 +1,13 @@
 # "Breakfast presidents" game Twitterbot
 
-
 import os
 import pickle
 import punmaker
 import pandas
 import yaml
 import random
+from time import sleep
 from sklearn import preprocessing
-
-
 
 
 class GameRound:
@@ -17,12 +15,15 @@ class GameRound:
     """
     def __init__(self, files, rootdir):
 
-        self.pdict = punmaker.PhonemeDictset()
-        self.model = pickle.load(open(rootdir+'model.pickle'))
-        self.scaler = pickle.load(open(rootdir+'scaler.pickle'))
-        self.pca = pickle.load(open(rootdir+'pca.pickle'))
-        self.topic1 = yaml.load(open('lists/'+files[0] ))
-        self.topic2 = yaml.load(open('lists/'+files[1] ))
+        self.pdict = punmaker.PhonemeDictset(rootdir)
+        self.model = pickle.load(open(rootdir + 'model.pickle'))
+        self.scaler = pickle.load(open(rootdir + 'scaler.pickle'))
+        self.pca = pickle.load(open(rootdir + 'pca.pickle'))
+        self.topic1 = yaml.load(open(rootdir + 'lists/'+files[0] ))
+        self.topic2 = yaml.load(open(rootdir + 'lists/'+files[1] ))
+
+        self.list1 = self.topic1['Items']
+        self.list2 = self.topic2['Items']
 
 
     def makeHashtag(self):
@@ -86,6 +87,11 @@ class GameRound:
 
         dr = pandas.DataFrame(data_reduced)
         df['score'] = [prob[1] for prob in self.model.predict_proba(dr)]
+
+        # delete unneeded columns
+        del_cols = ['short_strlen', 'long_strlen', 'swscore', 'pct_overlap', 'position_beginning', 'position_end']
+        df = df.drop(del_cols, 1)
+
         self.df = df
         return df
 
@@ -98,33 +104,44 @@ class GameRound:
         else:
             return choices.ix[random.sample(choices.index, N)]
 
-    def makePunTweet(self, pun):
-        '''Tweet a single pun'''
-        pass
 
 
-
-def main():
+def run_bot(rootdir):
     '''Run the bot'''
 
-    # todo: parse argv for root dir
-    rootdir = './'
-
-    # todo: import bot API keys
+    tokens = yaml.load(open(rootdir + 'config.yaml'))
+    api = twitter.Api(**tokens)
 
     # choose 2 files from lists dir
     filenames = next(os.walk(rootdir+'lists/'))[2]
     if len(filenames) < 2:
-        # todo: tweet a sad tweet and try again tomorrow
-        pass
+        sad_text = "I can't find my topic lists :["
+        api.PostUpdate(sad_text)
+        error_text = "Not enough lists found in " + rootdir + 'lists/'
+        sys.exit(error_text)
 
     g = GameRound(random.sample(filenames, 2), rootdir)
     g.makeAllPuns()
 
     # create & announce hashtag
-    tweet = g.openerTweet()
+    open_text = g.openerTweet()
+    api.PostUpdate(open_text)
 
-    #
+    # tweets!
+    puns = g.getTopPuns(n, 71)
+
+    for p in puns.iterrows():
+        text = p[1][0].title() + ' ' + g.makeHashtag()
+        api.PostUpdate(text)
+        sleep(1200)
 
 
-    pass
+
+# run the bot
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        rootdir = sys.argv[1]
+    else:
+        rootdir = './'
+
+    run_bot(rootdir)

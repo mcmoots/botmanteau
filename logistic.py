@@ -5,8 +5,6 @@ import numpy as np
 import pylab as pl
 from ggplot import *
 from sklearn import linear_model, decomposition, datasets
-from sklearn.pipeline import pipeline
-from sklearn.grid_search import GridSearchCV
 import pickle
 
 
