@@ -130,7 +130,7 @@ def run_bot(rootdir):
     api.PostUpdate(open_text)
 
     # tweets!
-    puns = g.getTopPuns(n, 71)
+    puns = g.getTopPuns(71)
 
     for p in puns.iterrows():
         text = p[1][0].title() + ' ' + g.makeHashtag()
