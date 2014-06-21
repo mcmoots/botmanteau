@@ -8,12 +8,13 @@ from sklearn import linear_model, decomposition, datasets
 from sklearn.pipeline import pipeline
 from sklearn.grid_search import GridSearchCV
 import pickle
-import statsmodels.api as sm
 
 
 df = pandas.read_csv('train_breakfast_presidents.csv')
 df = df.append( pandas.read_csv('train_fish_sportsballs.csv'), ignore_index=True )
 df = df.append( pandas.read_csv('train_beer_novels.csv'), ignore_index=True)
+df = df.append( pandas.read_csv('train_tree_countries.csv'), ignore_index=True)
+df = df.append( pandas.read_csv('train_cocktail_philosophers.csv'), ignore_index=True)
 
 tdf = pandas.read_csv('test_breakfast_presidents.csv')
 tdf = tdf.append( pandas.read_csv('test_scifi_sandwiches.csv'), ignore_index=True )
@@ -55,14 +56,6 @@ data_reduced = pca.transform(data_scaled)
 
 logistic = linear_model.LogisticRegression()
 logistic.fit(data_reduced, target)
-
-dr = pandas.DataFrame(data_reduced)
-t = target.reset_index(drop=True)
-
-
-
-logit = sm.Logit(dr, t)
-result = logit.fit()
 
 # save the scaler, PCA, and model
 pickle.dump(scaler, open('./scaler.pickle', 'w+'))

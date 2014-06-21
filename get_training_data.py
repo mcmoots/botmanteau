@@ -1,24 +1,17 @@
+# Functions to create training datasets
 
 import punmaker
 import csv
 import random
-import pandas
 
 def get_list(name):
     with open('lists/'+name+'.txt') as f:
         items = [line.rstrip('\n') for line in f]
     return items
 
-def get_ynq_input(prompt):
-    ans = raw_input(prompt)
-    while ans not in ['y', 'n', 'q']:
-        ans = raw_input('y/n (or q to quit) ')
-    return ans
-
-def write_training_data_to_file(data, file):
+def write_training_data(data, file):
     with open(file, 'w+') as f:
-        keys = ['pun', 'str1', 'str2', 'short_strlen', 'long_strlen',
-                'puntype', 'pct_overlap', 'swscore', 'result']
+        keys = ['str1', 'str2', 'pun', 'result', 'puntype', 'pct_overlap', 'swscore', 'short_strlen', 'long_strlen']
         datawriter = csv.DictWriter(f, keys)
         datawriter.writer.writerow(keys)
         datawriter.writerows(data)
@@ -83,11 +76,7 @@ def gather_forced_comparisons(list1, list2, iterations, output_file):
 
         iters += 1
 
-    write_training_data_to_file(training_data, output_file)
+    write_training_data(training_data, output_file)
     print "all done!"
     return training_data
 
-def load_training_data(filename):
-    with open(filename, 'r') as f:
-        train = pandas.read_csv(f)
-    return train

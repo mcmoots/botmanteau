@@ -1,25 +1,38 @@
 # "Breakfast presidents" game Twitterbot
 
+
+import os
 import pickle
 import punmaker
 import pandas
+import yaml
+import random
 from sklearn import preprocessing
+
+
 
 
 class GameRound:
     """ Stuff pertaining to one pair of topics / one day's game round
     """
-    def __init__(self, list1, list2):
+    def __init__(self, files, rootdir):
 
         self.pdict = punmaker.PhonemeDictset()
-        self.model = pickle.load(open('./model.pickle'))
-        self.scaler = pickle.load(open('./scaler.pickle'))
-        self.pca = pickle.load(open('./pca.pickle'))
-        # todo: take topic names as args and read in lists from file
-        # instead of taking the lists as args
-        # self.list1 = etc
-        self.list1 = list1
-        self.list2 = list2
+        self.model = pickle.load(open(rootdir+'model.pickle'))
+        self.scaler = pickle.load(open(rootdir+'scaler.pickle'))
+        self.pca = pickle.load(open(rootdir+'pca.pickle'))
+        self.topic1 = yaml.load(open('lists/'+files[0] ))
+        self.topic2 = yaml.load(open('lists/'+files[1] ))
+
+
+    def makeHashtag(self):
+        return '#' + self.topic1['Pos1'] + self.topic2['Pos2']
+
+
+    def openerTweet(self):
+        text = self.makeHashtag() + ' is the new #BreakfastPresidents'
+        return text
+
 
     def makeAllPuns(self):
         """Generate all possible puns + a predicted score
@@ -58,15 +71,60 @@ class GameRound:
                     print i1 + ' ' + i2
                     break
 
-        # convert to data frame
         df = pandas.DataFrame(puns)
-        model_cols = ['position_end', 'position_beginning', 'short_strlen', 'long_strlen', 'swscore', 'pct_overlap']
+        model_cols = ['short_strlen', 'long_strlen', 'swscore', 'pct_overlap',
+                      'position_beginning', 'position_end']
+        # excise any weird results
+        df = df[df.pct_overlap < .7]
+        df = df[df.pct_overlap >= 0]
+
         # convert to numpy array
         df = df.convert_objects(convert_numeric=True)
         data = df.as_matrix([model_cols])
         data_scaled = self.scaler.transform(data)
         data_reduced = self.pca.transform(data_scaled)
 
-        df['score'] = self.model.predict(data_reduced)
-
+        dr = pandas.DataFrame(data_reduced)
+        df['score'] = [prob[1] for prob in self.model.predict_proba(dr)]
+        self.df = df
         return df
+
+
+    def getTopPuns(self, N):
+        '''Return up to N highly-scoring puns'''
+        choices = self.df[self.df.score > 0.07]
+        if len(choices) < N:
+            return choices
+        else:
+            return choices.ix[random.sample(choices.index, N)]
+
+    def makePunTweet(self, pun):
+        '''Tweet a single pun'''
+        pass
+
+
+
+def main():
+    '''Run the bot'''
+
+    # todo: parse argv for root dir
+    rootdir = './'
+
+    # todo: import bot API keys
+
+    # choose 2 files from lists dir
+    filenames = next(os.walk(rootdir+'lists/'))[2]
+    if len(filenames) < 2:
+        # todo: tweet a sad tweet and try again tomorrow
+        pass
+
+    g = GameRound(random.sample(filenames, 2), rootdir)
+    g.makeAllPuns()
+
+    # create & announce hashtag
+    tweet = g.openerTweet()
+
+    #
+
+
+    pass

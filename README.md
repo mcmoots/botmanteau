@@ -11,8 +11,12 @@ Here is my approach though:
 * Substitution penalties are currently completely arbitrary and made up by me
 * Use a list of possible spellings for each phoneme to guess where the input strings should be spliced together
 
-Some to-dos:
+To-dos:
 * Add initials to the spelling routine
-* Reorganize functions
-* Figure out a scoring system & score threshold for the results
-* Have it loop through 2 lists to find the puns, start hashtag games on Twitter
+* Store training/test data in less model-dependent form (str1, str2, pun, win/lose) and recalculate the scores each time
+* Proper scikit-learn pipeline
+* Amass enough training data to learn a substitution matrix?
+* Format incl. metadata for the content lists
+* Twitterbot routines:
+    * Pick 2 lists, find top N puns, dole out over course of ~ a day, repeat
+    * Retweet anyone using that day's hashtag

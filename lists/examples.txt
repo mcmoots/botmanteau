@@ -1,4 +1,0 @@
-sample
-example
-instance
-specimen
