@@ -1,0 +1,74 @@
+Pos1: Rodent
+Pos2: Rodents
+Items:
+- Gundi
+- Speke's Pectinator
+- mole rat
+- naked mole rat
+- porcupine
+- rat
+- mouse
+- chinchilla
+- pacarana
+- viscacha
+- guinea pig
+- cavy
+- mara
+- capybara
+- agouti
+- acouchi
+- paca
+- tuco-tuco
+- rock rat
+- degu
+- coruro
+- bamboo rat
+- spiny rat
+- punare
+- insular cave rat
+- hutia
+- nutria
+- squirrel
+- springhare
+- springhaas
+- beaver
+- flying squirrel
+- ground squirrel
+- rope squirrel
+- pygmy squirrel
+- prairie dog
+- marmot
+- woodchuck
+- chipmunk
+- dormouse
+- pocket gopher
+- kangaroo rat
+- spiny pocket mouse
+- jerboa
+- birch mouse
+- jumping mouse
+- zokor
+- hamster
+- antsangy
+- gerbil
+- vole
+- tree vole
+- water vole
+- snow vole
+- lemming
+- prairie vole
+- muskrat
+- Duke of Bedford's vole
+- deermouse
+- woodrat
+- Mexican volcano mouse
+- grasshopper mouse
+- akodont
+- brucie
+- swamp rat
+- laucha
+- jird
+- Father Basilio's striped mouse
+- buffoon striped grass mouse
+- woolly rat
+- dwarf multimammate mouse
