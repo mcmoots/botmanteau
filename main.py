@@ -142,12 +142,12 @@ def run_bot(rootdir):
     g.makeAllPuns()
 
     # tweets!
-    puns = g.getTopPuns(71)
+    puns = g.getTopPuns(12)
 
     for p in puns.iterrows():
         text = p[1][0].title() + ' ' + g.makeHashtag()
         api.PostUpdate(text)
-        sleep(1200)
+        sleep(7200)
 
 
 
